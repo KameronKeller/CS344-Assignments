@@ -1,0 +1,3 @@
+#!/bin/bash
+
+ls -alS /usr/bin | head -7 | tr -s " " | cut -d' ' -f 5,9
