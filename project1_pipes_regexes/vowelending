@@ -1,0 +1,3 @@
+#!/bin/bash
+
+ls -a $1 | tr -s " " | grep -i "[aeiou]$"
