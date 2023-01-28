@@ -1,3 +1,8 @@
+# Ignore C executable files (extension-less); ignore all files except those with extensions and directorys
+*
+!*.*
+!*/
+
 # Prerequisites
 *.d
 
