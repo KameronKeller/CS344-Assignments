@@ -6,15 +6,26 @@
 
 
 void execute_commands(char *commands[]) {
-    pid_t pid = fork();
 
-    if (pid == 0) {
-        int status_code = execvp(commands[0], commands);
+    if (strcmp(commands[0], "cd") == 0) {
+        int status_code = chdir(commands[1]);
         if (status_code == -1) {
-            perror("execute_commands");
-            exit(1);
+            perror("chdir");
+        }
+    } else if (strcmp(commands[0], "exit") == 0) {
+        exit(0);
+    } else {
+        pid_t pid = fork();
+
+        if (pid == 0) {
+            int status_code = execvp(commands[0], commands);
+            if (status_code == -1) {
+                perror("execvp");
+                exit(1);
+            }
         }
     }
+
     wait(NULL);
 }
 
