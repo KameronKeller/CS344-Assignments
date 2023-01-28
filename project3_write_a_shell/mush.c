@@ -1,8 +1,23 @@
 #include <stdio.h> // for printf(), fgets(), perror()
-// #include <stdlib.h> // for exit()
+#include <stdlib.h> // for exit()
 #include <string.h> // for strtok(), strcmp()
 #include <unistd.h> // for fork(), execvp()
-// #include <sys/wait.h> // for wait()
+#include <sys/wait.h> // for wait()
+
+
+void execute_commands(char *commands[]) {
+    pid_t pid = fork();
+
+    if (pid == 0) {
+        int status_code = execvp(commands[0], commands);
+        if (status_code == -1) {
+            perror("execute_commands");
+            exit(1);
+        }
+    }
+    wait(NULL);
+}
+
 
 int main(int argc, char const *argv[]) {
     const char PROMPT = '$';
@@ -38,15 +53,13 @@ int main(int argc, char const *argv[]) {
 
         commands[counter] = NULL; // Terminate the array with NULL
 
-        execvp(commands[0], commands);
+        // execvp(commands[0], commands);
+        execute_commands(commands);
 
         // Verify array was filled correctly
         // for (int i = 0; i < counter + 1; i++) {
         //     printf("command %d: %s\n", i, commands[i]);
         // }
-
-        
-
 
     }
 
