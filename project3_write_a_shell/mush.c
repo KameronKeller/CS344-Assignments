@@ -4,13 +4,30 @@
 #include <unistd.h> // for fork(), execvp()
 #include <sys/wait.h> // for wait()
 
+void read_input(char *input, int max_input_size) {
+    fgets(input, max_input_size, stdin); // stops after \n is found, but includes \n
+    input[strcspn(input, "\n")] = 0; // get rid of the \n (https://stackoverflow.com/questions/2693776/removing-trailing-newline-character-from-fgets-input)
+}
+
+// Note to self: **commands is a pointer to a pointer of words
+void parse_commands(char *input, char **commands) {
+    int counter = 0;
+
+    char *token = strtok(input, " ");
+    while(token) {
+        commands[counter] = token; // Append each word to an array
+        token = strtok(NULL, " ");
+        counter++;
+    }
+    commands[counter] = NULL; // Terminate the array with NULL
+}
+
 
 void execute_commands(char *commands[]) {
-
     if (strcmp(commands[0], "cd") == 0) {
         int status_code = chdir(commands[1]);
         if (status_code == -1) {
-            perror("chdir");
+            perror("cd");
         }
     } else if (strcmp(commands[0], "exit") == 0) {
         exit(0);
@@ -35,43 +52,17 @@ int main(int argc, char const *argv[]) {
     const int MAX_INPUT_SIZE = 100;
     const int MAX_INDIVIDUAL_WORDS = 128;
 
-    (void)argc;  // Expression does nothing, but now argc is "used"
+    (void)argc;  // Expression does nothing, but now argc & argv are "used"
     (void)argv;
 
     char input[MAX_INPUT_SIZE];
     char *commands[MAX_INDIVIDUAL_WORDS];
 
     while (1) {
-        // Print a prompt
         printf("%c ", PROMPT);
-
-        // Read a line
-        fgets(input, MAX_INPUT_SIZE, stdin); // stops after \n is found, but includes \n
-        input[strcspn(input, "\n")] = 0; // get rid of the \n (https://stackoverflow.com/questions/2693776/removing-trailing-newline-character-from-fgets-input)
-        
-        // Parse the prompt down to individual words
-        char *token = strtok(input, " ");
-
-        // Count the number of words
-        int counter = 0;
-
-        while(token) {
-            commands[counter] = token; // Append each word to an array
-            // printf("token = %s\n", token);
-            token = strtok(NULL, " ");
-            counter++;
-        }
-
-        commands[counter] = NULL; // Terminate the array with NULL
-
-        // execvp(commands[0], commands);
+        read_input(input, MAX_INPUT_SIZE);
+        parse_commands(input, commands);
         execute_commands(commands);
-
-        // Verify array was filled correctly
-        // for (int i = 0; i < counter + 1; i++) {
-        //     printf("command %d: %s\n", i, commands[i]);
-        // }
-
     }
 
 
