@@ -13,10 +13,10 @@ void read_input(char *input, int max_input_size) {
 void parse_commands(char *input, char **commands) {
     int counter = 0;
 
-    char *token = strtok(input, " ");
+    char *token = strtok(input, " \t\n\r");  // split on space, tab, newline, return
     while(token) {
         commands[counter] = token; // Append each word to an array
-        token = strtok(NULL, " ");
+        token = strtok(NULL, " \t\n\r");
         counter++;
     }
     commands[counter] = NULL; // Terminate the array with NULL
