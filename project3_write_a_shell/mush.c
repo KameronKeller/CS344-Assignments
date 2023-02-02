@@ -60,6 +60,7 @@ int main(int argc, char const *argv[]) {
 
     while (1) {
         printf("%c ", PROMPT);
+        fflush(stdout); // Force prompt to display
         read_input(input, MAX_INPUT_SIZE);
         parse_commands(input, commands);
         execute_commands(commands);
