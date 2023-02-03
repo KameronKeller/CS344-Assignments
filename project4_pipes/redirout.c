@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
     char *file_path = argv[1];
 
     verify_correct_num_args(argc);
-    int output_fd = open(file_path, O_WRONLY|O_CREAT, 0644);
+    int output_fd = open(file_path, O_WRONLY|O_CREAT|O_TRUNC, 0644);
     create_pipe(pipe_fd);
     const int PIPE_INPUT = pipe_fd[0];
     const int PIPE_OUTPUT = pipe_fd[1];
