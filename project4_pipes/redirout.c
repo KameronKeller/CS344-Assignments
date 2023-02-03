@@ -44,7 +44,6 @@ void write_to_file(int output_fd, int pipe_input, int pipe_output) {
     int bytes_read = 0;
     char *buffer[BUFFER_SIZE];
     close(pipe_output);
-    // while (reading_file(pipe_input, buffer, BUFFER_SIZE)) {
     while ((bytes_read = read(pipe_input, buffer, BUFFER_SIZE)) > 0) {
         write(output_fd, buffer, bytes_read);
     }
