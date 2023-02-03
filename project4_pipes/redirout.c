@@ -8,7 +8,6 @@ Example usage:
 
 */
 
-
 #include <stdio.h> // for printf(), perror()
 #include <stdlib.h> // for exit()
 #include <unistd.h> // for fork(), execlp(), close()
@@ -35,26 +34,19 @@ int is_child_process(int pid) {
 }
 
 void run_command(char *argv[], int pipe_input, int pipe_output) {
-    // dup2(STDOUT, pipe_output);
     dup2(pipe_output, STDOUT);
     close(pipe_input);
     execvp(argv[2], &argv[2]);
 }
 
-int reading_file(int fd, char *buffer[], int buffer_size) {
-    int bytes_read = read(fd, buffer, buffer_size);
-    printf("bytes_read: %i\n", bytes_read);
-    return bytes_read > 0 ? 1 : 0; 
-
-}
-
 void write_to_file(int output_fd, int pipe_input, int pipe_output) {
     const int BUFFER_SIZE = 1024;
+    int bytes_read = 0;
     char *buffer[BUFFER_SIZE];
     close(pipe_output);
-    while (reading_file(pipe_input, buffer, BUFFER_SIZE)) {
-    // while ((read(pipe_input, buffer, BUFFER_SIZE)) > 0) {
-        write(output_fd, buffer, BUFFER_SIZE);
+    // while (reading_file(pipe_input, buffer, BUFFER_SIZE)) {
+    while ((bytes_read = read(pipe_input, buffer, BUFFER_SIZE)) > 0) {
+        write(output_fd, buffer, bytes_read);
     }
     close(pipe_input);
     close(output_fd);
