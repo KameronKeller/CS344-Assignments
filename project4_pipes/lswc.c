@@ -17,13 +17,17 @@ const char *parse_input(int argc, const char *argv[]) {
 
 
 int main(int argc, const char *argv[]) {
-
+    int pipe_fd[2];
 
 
     const char *path = parse_input(argc, argv);
     // printf("%s\n", path);
     // create_pipe()
-    // pid_t pid = fork()
+    int pipe_status = pipe(pipe_fd);
+    if (pipe_status == -1)
+        perror("pipe failure");
+
+    pid_t pid = fork();
     // if child_process(pid) {}
     // else {
         // wait(NULL);
