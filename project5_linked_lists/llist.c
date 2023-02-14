@@ -3,14 +3,51 @@
 #include <stdlib.h>
 #include <string.h>
 
+void node_printer(struct node *n, char *name) {
+	printf("\t------\n");
+	printf("\t%s address: %p\n", name, n);
+	printf("\t%s value: %d\n", name, n->value);
+	if (n->next == NULL) {
+		printf("\t%s next: NULL\n", name);
+	} else {
+		printf("\t%s next: %d\n", name, n->next->value);
+		printf("\t%s next address: %p\n", name, n->next);
+	}
+}
+
 void llist_insert_head(struct node **head, struct node *n) {
+	printf("insert head %d\n", n->value);
+	if (*head == NULL) {
+		*head = n;
+	} else {
+		// node_printer(*head, "head");
+		struct node *temp = malloc(sizeof(struct node));
+		temp->value = (*head)->value;
+		temp->next = (*head)->next;
+		(*head)->value = n->value;
+		(*head)->next = n;
+		n->value = temp->value;
+		n->next = temp->next;
+		node_free(temp);
+		// temp->value = (*head)->value;
+		// temp->next = (*head)->next;
+		// printf("\ttemp = %d\n", temp->value);
+		// (*head)->value = n->value;
+		// (*head)->next = n;
+		// printf("\thead is now: %d\n", (*head)->value);
+		// printf("\thead points to NULL? %d\n", (*head)->next == NULL);
+		// n->value = temp->value;
+		// n->next = temp->next;
+		// (*head)->next = n;
+		// printf("\ttemp is : %d\n", temp->value);
+		// printf("\tn is : %d\n", n->value);
 
-	struct node *temp = malloc(sizeof(struct node));
-	temp = *head;
-	*head = n;
-	n = temp;
+		// node_printer(*head, "head");
+		// node_printer(n, "n");
+		// node_printer(temp, "temp");
 
-	free(temp);
+		// node_free(temp);
+	}
 
 }
 
@@ -27,70 +64,19 @@ struct node *llist_delete_head(struct node **head) {
 }
 
 void llist_insert_tail(struct node **head, struct node *n) {
-	// printf("n value: %d\n", n->value);
 	struct node *current = *head;
 	if (*head == NULL) {
 		*head = n;
 	} else if (current->next == NULL) {
 		current->next = n;
 	} else {
-		// printf("%d entering while loop\n", n->value);
 		while (current->next != NULL) {
 			current = current->next;
 		}
 		current->next = n;
-		// 	printf("\tcurrent value: %d\n", current->value);
-		// 	printf("\tcurrent's next: %d\n", current->next->value);
-		// 	if (current->next == NULL) {
-		// 		printf("\t\t current->next == NULL? %d\n", current->next == NULL);
-		// 		current->next = n;
-		// 		break;
-		// 	} else {
-		// 		current = current->next;
-		// 	}
-		// }
 	}
-
-	// struct node *current = *head;
 }
 
-// void llist_insert_tail(struct node **head, struct node *n) {
-// 	struct node *current = NULL;
-
-// 	if (*head == NULL) {
-// 		*head = n;
-// 		current = *head;
-// 		// struct node *current = *head;
-// 	} else if ()
-
-// 	// printf("value: %d\n", current->value);
-
-// 	struct node *next = n->next;
-
-
-// 	// if (next->next == NULL) {
-// 		printf("%d\n", next->value);
-// 	// 	next->next = n;
-// 	// } 
-// 	//else {
-// 	// 	llist_insert_tail(head, next);
-// 	// }
-// 	// 	printf("value: %d\n", n->value);
-// 	// 	current->next = n;
-// 	// } else {
-// 	// 	printf("recursive call\n");
-// 	// 	// llist_insert_tail(head, current->next);
-// 	// }
-
-// 	// while (current->next != NULL) {
-// 	// 	current = current->next;
-// 	// 	if (current->next == NULL) {
-// 	// 		current->next = n;
-// 	// 		break;
-// 	// 	}
-// 	// }
-
-// }
 
 void llist_print(struct node *head) {
 	if (head == NULL) {
@@ -169,8 +155,8 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	// struct node *head = node_alloc(5050);
-	// struct node *next_node = node_alloc(1234);
+	// struct node *head = node_alloc(1);
+	// struct node *next_node = node_alloc(2);
 	// head->next = next_node;
 
 	struct node *head = NULL;
