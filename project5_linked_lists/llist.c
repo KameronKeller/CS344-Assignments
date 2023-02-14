@@ -15,9 +15,15 @@
 
 // }
 
-// void llist_print(struct node *head) {
-
-// }
+void llist_print(struct node *head) {
+	struct node *current = head;
+	printf("%d", head->value);
+	while (current->next != NULL) {
+		current = current->next;
+		printf(" -> %d", current->value);
+	}
+	printf("\n");
+}
 
 // void llist_free(struct node **head) {
 
@@ -71,6 +77,10 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
+	struct node *head = node_alloc(5050);
+	struct node *next_node = node_alloc(1234);
+	head->next = next_node;
+
 	for (int i = 1; i < argc; i++) {
 
 		if (is_ih(argv[i])) {
@@ -84,7 +94,7 @@ int main(int argc, char *argv[]) {
 		} else if (is_f(argv[i])) {
 			// llist_free();
 		} else if (is_p(argv[i])) {
-			// llist_print();
+			llist_print(head);
 		} else {
 			printf("%s\n", USAGE_STATEMENT);
 			exit(1);
