@@ -3,9 +3,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-// void llist_insert_head(struct node **head, struct node *n) {
+void llist_insert_head(struct node **head, struct node *n) {
 
-// }
+	struct node *temp = malloc(sizeof(struct node));
+	temp->value = (*head)->value;
+	temp->next = (*head)->next;
+	(*head)->value = n->value;
+	(*head)->next = n;
+	n->value = temp->value;
+	n->next = temp->next;
+
+	free(temp);
+
+}
 
 // struct node *llist_delete_head(struct node **head) {
 
@@ -81,11 +91,16 @@ int main(int argc, char *argv[]) {
 	struct node *next_node = node_alloc(1234);
 	head->next = next_node;
 
+
 	for (int i = 1; i < argc; i++) {
 
 		if (is_ih(argv[i])) {
-			// llist_insert_head(struct node **head, struct node *n);
-			i++; // it takes two arguments, so increment to skip arg on next loop
+			char *new_head_string_value = argv[i + 1];
+			int new_head_value = atoi(new_head_string_value);
+
+			struct node *n = node_alloc(new_head_value);
+			llist_insert_head(&head, n);
+			i++; // ih it takes two arguments, so increment to skip value arg on next loop
 		} else if (is_it(argv[i])) {
 			// llist_insert_tail(struct node **head, struct node *n);
 			i++; // it takes two arguments, so increment to skip arg on next loop
