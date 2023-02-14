@@ -7,6 +7,7 @@ void node_printer(struct node *n, char *name) {
 	printf("\t------\n");
 	printf("\t%s address: %p\n", name, n);
 	printf("\t%s value: %d\n", name, n->value);
+
 	if (n->next == NULL) {
 		printf("\t%s next: NULL\n", name);
 	} else {
@@ -16,37 +17,21 @@ void node_printer(struct node *n, char *name) {
 }
 
 void llist_insert_head(struct node **head, struct node *n) {
-	printf("insert head %d\n", n->value);
 	if (*head == NULL) {
 		*head = n;
 	} else {
-		// node_printer(*head, "head");
 		struct node *temp = malloc(sizeof(struct node));
+
 		temp->value = (*head)->value;
 		temp->next = (*head)->next;
+
 		(*head)->value = n->value;
 		(*head)->next = n;
+
 		n->value = temp->value;
 		n->next = temp->next;
+
 		node_free(temp);
-		// temp->value = (*head)->value;
-		// temp->next = (*head)->next;
-		// printf("\ttemp = %d\n", temp->value);
-		// (*head)->value = n->value;
-		// (*head)->next = n;
-		// printf("\thead is now: %d\n", (*head)->value);
-		// printf("\thead points to NULL? %d\n", (*head)->next == NULL);
-		// n->value = temp->value;
-		// n->next = temp->next;
-		// (*head)->next = n;
-		// printf("\ttemp is : %d\n", temp->value);
-		// printf("\tn is : %d\n", n->value);
-
-		// node_printer(*head, "head");
-		// node_printer(n, "n");
-		// node_printer(temp, "temp");
-
-		// node_free(temp);
 	}
 
 }
@@ -57,14 +42,17 @@ struct node *llist_delete_head(struct node **head) {
 	} else {
 		struct node *temp = malloc(sizeof(struct node));
 		struct node *next = (*head)->next;
+
 		temp = *head;
 		*head = next;
+
 		return temp;
 	}
 }
 
 void llist_insert_tail(struct node **head, struct node *n) {
 	struct node *current = *head;
+	
 	if (*head == NULL) {
 		*head = n;
 	} else if (current->next == NULL) {
@@ -97,14 +85,6 @@ void llist_free(struct node **head) {
 		struct node *free_node = llist_delete_head(&*head);
 		node_free(free_node);
 	}
-
-
-	// struct node *current = *head;
-	// struct node *next = (*head)->next;
-	// while (next != NULL) {
-	// 	struct node *next = current->next;
-	// 	node_free(current);
-	// }
 }
 
 
@@ -116,8 +96,6 @@ struct node *node_alloc(int value) {
 		new_node->next = NULL;
 	}
 
-	// struct node new_node = {value, NULL};
-	// return &(struct node){value, NULL};
 	return new_node;
 }
 
@@ -155,45 +133,36 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	// struct node *head = node_alloc(1);
-	// struct node *next_node = node_alloc(2);
-	// head->next = next_node;
-
 	struct node *head = NULL;
 
-
 	for (int i = 1; i < argc; i++) {
+		char *command = argv[i];
 
-		if (is_ih(argv[i])) {
-			char *new_head_string_value = argv[i + 1];
-			int new_head_value = atoi(new_head_string_value);
+		if (is_ih(command) || is_it(command)) {
 
-			struct node *n = node_alloc(new_head_value);
-			llist_insert_head(&head, n);
-			i++; // ih it takes two arguments, so increment to skip value arg on next loop
-		} else if (is_it(argv[i])) {
-			char *new_tail_string_value = argv[i + 1];
-			int new_tail_value = atoi(new_tail_string_value);
-			struct node *n = node_alloc(new_tail_value);
+			int argument = atoi(argv[i+1]);
+			struct node *n = node_alloc(argument);
 
-			llist_insert_tail(&head, n);
-
-			i++; // it takes two arguments, so increment to skip arg on next loop
-		} else if (is_dh(argv[i])) {
+			if (is_ih(command)) {
+				llist_insert_head(&head, n);
+			} else if (is_it(command)) {
+				llist_insert_tail(&head, n);
+			}
+			i++; // fast-forward i to skip over the argument on the next iteration
+		} else if (is_dh(command)) {
 			struct node *deleted_head = llist_delete_head(&head);
-		} else if (is_f(argv[i])) {
+		} else if (is_f(command)) {
 			llist_free(&head);
-		} else if (is_p(argv[i])) {
+		} else if (is_p(command)) {
 			llist_print(head);
 		} else {
 			printf("%s\n", USAGE_STATEMENT);
 			exit(1);
+
 		}
 
 	}
 
-
-
-
 	return 0;
+
 }
