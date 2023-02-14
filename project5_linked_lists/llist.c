@@ -6,20 +6,32 @@
 void llist_insert_head(struct node **head, struct node *n) {
 
 	struct node *temp = malloc(sizeof(struct node));
-	temp->value = (*head)->value;
-	temp->next = (*head)->next;
-	(*head)->value = n->value;
-	(*head)->next = n;
-	n->value = temp->value;
-	n->next = temp->next;
+	// temp->value = (*head)->value;
+	// temp->next = (*head)->next;
+	temp = *head;
+	// (*head)->value = n->value;
+	// (*head)->next = n;
+	*head = n;
+	n = temp;
+
+	// n->value = temp->value;
+	// n->next = temp->next;
 
 	free(temp);
 
 }
 
-// struct node *llist_delete_head(struct node **head) {
-
-// }
+struct node *llist_delete_head(struct node **head) {
+	if (*head == NULL) {
+		return NULL;
+	} else {
+		struct node *temp = malloc(sizeof(struct node));
+		struct node *next = (*head)->next;
+		temp = *head;
+		*head = next;
+		return temp;
+	}
+}
 
 void llist_insert_tail(struct node **head, struct node *n) {
 	struct node *current = *head;
@@ -101,6 +113,7 @@ int main(int argc, char *argv[]) {
 	head->next = next_node;
 
 
+
 	for (int i = 1; i < argc; i++) {
 
 		if (is_ih(argv[i])) {
@@ -119,7 +132,7 @@ int main(int argc, char *argv[]) {
 
 			i++; // it takes two arguments, so increment to skip arg on next loop
 		} else if (is_dh(argv[i])) {
-			// llist_delete_head();
+			struct node *deleted_head = llist_delete_head(&head);
 		} else if (is_f(argv[i])) {
 			// llist_free();
 		} else if (is_p(argv[i])) {
@@ -130,7 +143,6 @@ int main(int argc, char *argv[]) {
 		}
 
 	}
-
 
 
 
