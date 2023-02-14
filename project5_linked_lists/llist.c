@@ -21,9 +21,18 @@ void llist_insert_head(struct node **head, struct node *n) {
 
 // }
 
-// void llist_insert_tail(struct node **head, struct node *n) {
+void llist_insert_tail(struct node **head, struct node *n) {
+	struct node *current = *head;
 
-// }
+	while (current->next != NULL) {
+		current = current->next;
+		if (current->next == NULL) {
+			current->next = n;
+			break;
+		}
+	}
+
+}
 
 void llist_print(struct node *head) {
 	struct node *current = head;
@@ -102,7 +111,12 @@ int main(int argc, char *argv[]) {
 			llist_insert_head(&head, n);
 			i++; // ih it takes two arguments, so increment to skip value arg on next loop
 		} else if (is_it(argv[i])) {
-			// llist_insert_tail(struct node **head, struct node *n);
+			char *new_tail_string_value = argv[i + 1];
+			int new_tail_value = atoi(new_tail_string_value);
+			struct node *n = node_alloc(new_tail_value);
+
+			llist_insert_tail(&head, n);
+
 			i++; // it takes two arguments, so increment to skip arg on next loop
 		} else if (is_dh(argv[i])) {
 			// llist_delete_head();
