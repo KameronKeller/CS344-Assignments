@@ -1,30 +1,9 @@
+/*
+Author: Kameron Keller
+Course: CS 344 OS I, Winter 2023
+Assignment: Project 6
+*/
 
-
-
-// void *myalloc(int size);
-// void myfree(void *p);
-
-// void *heap = mmap(NULL, 1024, PROT_READ|PROT_WRITE,
-//                   MAP_ANON|MAP_PRIVATE, -1, 0);
-
-
-
-// // in my_malloc()
-
-
-
-// struct block *cur;
-
-// // ... All the machinations to allocate go here ...
-
-// padded_block_size = PADDED_SIZE(sizeof(struct block));
-
-// return PTR_OFFSET(cur, padded_block_size);
-
-
-// padded_struct_block_size = PADDED_SIZE(sizeof(struct block));
-
-// Assignment Description -------------------------- 
 #include <stdio.h>
 #include <sys/mman.h>
 
@@ -40,6 +19,8 @@ struct block {
     int size;     // Bytes
     int in_use;   // Boolean
 };
+
+// void myfree(void *p); // To be implemented
 
 void print_data(void) {
     struct block *b = head;
@@ -75,6 +56,15 @@ int last_node(struct block *node) {
 	return node->next == NULL;
 }
 
+void mark_in_use(struct block **node) {
+	(*node)->in_use = 1;
+}
+
+void *pointer_offset(struct block *node) {
+	int padded_block_size = PADDED_SIZE(sizeof(struct block));
+	return PTR_OFFSET(node, padded_block_size);
+}
+
 struct block *get_sufficient_block(int size, struct block *node) {
 	if (is_available(node) && is_large_enough(size, node)) {
 		return node;
@@ -83,19 +73,19 @@ struct block *get_sufficient_block(int size, struct block *node) {
 	} else {
 		return get_sufficient_block(size, node->next);
 	}
+}
 
+void setup_initial_memory(int num_bytes, struct block **head) {
+    *head = mmap(NULL, num_bytes, PROT_READ|PROT_WRITE,
+                MAP_ANON|MAP_PRIVATE, -1, 0);
+    (*head)->next = NULL;
+    (*head)->size = num_bytes - PADDED_SIZE(sizeof(struct block));
+    (*head)->in_use = 0;
 }
 
 void *myalloc(int size) {
-	// void *heap = mmap(NULL, 1024, PROT_READ|PROT_WRITE,
-    //               MAP_ANON|MAP_PRIVATE, -1, 0);
-
 	if (head == NULL) {
-	    head = mmap(NULL, 1024, PROT_READ|PROT_WRITE,
-	                MAP_ANON|MAP_PRIVATE, -1, 0);
-	    head->next = NULL;
-	    head->size = 1024 - PADDED_SIZE(sizeof(struct block));
-	    head->in_use = 0;
+		setup_initial_memory(1024, &head);
 	}
 
 	struct block *available_block = get_sufficient_block(size, head);
@@ -103,39 +93,45 @@ void *myalloc(int size) {
 	if (available_block == NULL) {
 		return NULL;
 	} else {
-		available_block->in_use = 1;
-		int padded_block_size = PADDED_SIZE(sizeof(struct block));
-		return PTR_OFFSET(available_block, padded_block_size);
+		mark_in_use(&available_block);
+		return pointer_offset(available_block);
 	}
+}
 
+void test_methods() { // simple method to test other helper functions. Delete if no longer needed for testing.
+	// Create sample nodes
+	struct block n3 = { NULL, 1000, 0 };
+	struct block n2 = { &n3, 5, 0 };
+	struct block n1 = { &n2, 10, 0 };
+
+	struct block *available = get_sufficient_block(20, &n1);
+
+	printf("=== Start method tests ===\n");
+	printf("available? %d\n", is_available(&n1));
+	printf("found? %d\n", available == NULL);
+	printf("found: %d\n", available->size);
+	printf("=== End method tests ===\n\n");
 }
 
 
 int main(void) {
+	// test_methods(); // Function for testing various helper functions, uncomment to use or delete if unneeded
 
-	// struct block n3 = { NULL, 1000, 0 };
-	// struct block n2 = { &n3, 5, 0 };
-	// struct block n1 = { &n2, 10, 0 };
+	void *p;
 
-	// struct block *available = get_sufficient_block(20, &n1);
-	// // printf("available? %d\n", is_available(&n1));
-	// // printf("found? %d\n", available == NULL);
-	// printf("found: %d\n", available->size);
+	// Sample run 1
+	print_data();
+	p = myalloc(64);
+	print_data();
 
-	// void *p;
+	head = NULL;
 
-	// print_data();
-	// p = myalloc(64);
-	// print_data();
-
-    void *p;
-
+	// Sample run 2
     print_data();
     p = myalloc(16);
     print_data();
     p = myalloc(16);
     printf("%p\n", p);
-
 }
 
 
