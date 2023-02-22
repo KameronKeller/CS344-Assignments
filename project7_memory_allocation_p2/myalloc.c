@@ -51,13 +51,12 @@ int is_available(struct block *node) {
 	return node->in_use ? 0 : 1;
 }
 
-int is_large_enough(int requested_space, struct block *node) {
-	return requested_space <= node->size;
+int is_large_enough(int padded_requested_space, struct block *node) {
+	return padded_requested_space <= node->size;
 }
 
-int is_splittable(struct block *node, int requested_space) {
+int is_splittable(struct block *node, int padded_requested_space) {
 	int available_space = node->size;
-	int padded_requested_space = PADDED_SIZE(requested_space);
 	int padded_struct_block_size = PADDED_SIZE(sizeof(struct block));
 	int required_space = padded_requested_space + padded_struct_block_size + 16;
 
@@ -77,14 +76,17 @@ void *pointer_offset(struct block *node) {
 	return PTR_OFFSET(node, padded_block_size);
 }
 
-void split_space(struct block **node, int requested_space) {
-	int remaining_space = (*node)->size - requested_space;
+void split_space(struct block **node, int padded_requested_space) {
+	int remaining_space = (*node)->size - padded_requested_space - sizeof(struct block);
+	printf("remaining space: %d\n", remaining_space);
 	// struct block *new_block = { .next=(NULL), .size=remaining_space, .in_use=0 };
 	struct block new_block = {NULL, remaining_space, 0};
-	memcpy(*node + requested_space, &new_block, sizeof (struct block));
+	void *new_address = *node + padded_requested_space + sizeof(struct block);
+	// memcpy(*node + padded_requested_space, &new_block, sizeof (struct block));
+	memcpy(new_address, &new_block, sizeof (struct block));
 	// (*node)->next = new_block;
-	(*node)->next = *node + requested_space;
-	(*node)->size = requested_space;
+	(*node)->next = new_address;
+	(*node)->size = padded_requested_space;
 	(*node)->in_use = 1;
 
 
@@ -92,16 +94,16 @@ void split_space(struct block **node, int requested_space) {
 		// connect node
 }
 
-struct block *get_sufficient_block(int requested_space, struct block *node) {
-	if (is_available(node) && is_large_enough(requested_space, node)) {
-		// if (is_splittable(node, requested_space)) {
-			split_space(&node, requested_space);
+struct block *get_sufficient_block(int padded_requested_space, struct block *node) {
+	if (is_available(node) && is_large_enough(padded_requested_space, node)) {
+		// if (is_splittable(node, padded_requested_space)) {
+			split_space(&node, padded_requested_space);
 		// }
 		return node;
 	} else if (last_node(node)) {
 		return NULL;
 	} else {
-		return get_sufficient_block(requested_space, node->next);
+		return get_sufficient_block(padded_requested_space, node->next);
 	}
 }
 
@@ -114,11 +116,12 @@ void setup_initial_memory(int num_bytes, struct block **head) {
 }
 
 void *myalloc(int requested_space) {
+	int padded_requested_space = PADDED_SIZE(requested_space);
 	if (head == NULL) {
 		setup_initial_memory(1024, &head);
 	}
 
-	struct block *available_block = get_sufficient_block(requested_space, head);
+	struct block *available_block = get_sufficient_block(padded_requested_space, head);
 
 	if (available_block == NULL) { // if no available block
 		return NULL;
