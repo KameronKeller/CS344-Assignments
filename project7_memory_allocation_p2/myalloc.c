@@ -76,29 +76,24 @@ void *pointer_offset(struct block *node) {
 	return PTR_OFFSET(node, padded_block_size);
 }
 
+
 void split_space(struct block **node, int padded_requested_space) {
 	int remaining_space = (*node)->size - padded_requested_space - sizeof(struct block);
-	printf("remaining space: %d\n", remaining_space);
-	// struct block *new_block = { .next=(NULL), .size=remaining_space, .in_use=0 };
-	struct block new_block = {NULL, remaining_space, 0};
-	void *new_address = *node + padded_requested_space + sizeof(struct block);
-	// memcpy(*node + padded_requested_space, &new_block, sizeof (struct block));
+	struct block new_block = { .next=NULL, .size=remaining_space, .in_use=0 };
+	void *new_address = pointer_offset(*node) + padded_requested_space;
+
 	memcpy(new_address, &new_block, sizeof (struct block));
-	// (*node)->next = new_block;
+
 	(*node)->next = new_address;
 	(*node)->size = padded_requested_space;
 	(*node)->in_use = 1;
-
-
-		// new node
-		// connect node
 }
 
 struct block *get_sufficient_block(int padded_requested_space, struct block *node) {
 	if (is_available(node) && is_large_enough(padded_requested_space, node)) {
-		// if (is_splittable(node, padded_requested_space)) {
+		if (is_splittable(node, padded_requested_space)) {
 			split_space(&node, padded_requested_space);
-		// }
+		}
 		return node;
 	} else if (last_node(node)) {
 		return NULL;
@@ -131,32 +126,17 @@ void *myalloc(int requested_space) {
 	}
 }
 
-void test_methods() { // simple method to test other helper functions. Delete if no longer needed for testing.
-	// Create sample nodes
-	struct block n3 = { NULL, 1000, 0 };
-	struct block n2 = { &n3, 5, 0 };
-	struct block n1 = { &n2, 10, 0 };
-
-	struct block *available = get_sufficient_block(20, &n1);
-
-	printf("=== Start method tests ===\n");
-	printf("available? %d\n", is_available(&n1));
-	printf("found? %d\n", available == NULL);
-	printf("found: %d\n", available->size);
-	printf("=== End method tests ===\n\n");
-}
-
 
 int main(void) {
-	// test_methods(); // Function for testing various helper functions, uncomment to use or delete if unneeded
 
     void *p;
 
-    p = myalloc(117);
+    p = myalloc(512);
     print_data();
 
-    // myfree(p);
-    // print_data();
+    myfree(p);
+    print_data();
+
 }
 
 
