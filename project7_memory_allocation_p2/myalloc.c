@@ -6,6 +6,7 @@ Assignment: Project 7
 
 #include <stdio.h>
 #include <sys/mman.h>
+#include <string.h>
 
 #define ALIGNMENT 16   // Must be power of 2
 #define GET_PAD(x) ((ALIGNMENT - 1) - (((x) - 1) & (ALIGNMENT - 1)))
@@ -59,7 +60,7 @@ int is_splittable(struct block *node, int requested_space) {
 	int padded_requested_space = PADDED_SIZE(requested_space);
 	int padded_struct_block_size = PADDED_SIZE(sizeof(struct block));
 	int required_space = padded_requested_space + padded_struct_block_size + 16;
-	
+
 	return available_space >= required_space ? 1 : 0;
 }
 
@@ -76,16 +77,26 @@ void *pointer_offset(struct block *node) {
 	return PTR_OFFSET(node, padded_block_size);
 }
 
-void split_space(struct block *node, int size) {
+void split_space(struct block **node, int requested_space) {
+	int remaining_space = (*node)->size - requested_space;
+	// struct block *new_block = { .next=(NULL), .size=remaining_space, .in_use=0 };
+	struct block new_block = {NULL, remaining_space, 0};
+	memcpy(*node + requested_space, &new_block, sizeof (struct block));
+	// (*node)->next = new_block;
+	(*node)->next = *node + requested_space;
+	(*node)->size = requested_space;
+	(*node)->in_use = 1;
+
+
 		// new node
 		// connect node
 }
 
 struct block *get_sufficient_block(int requested_space, struct block *node) {
 	if (is_available(node) && is_large_enough(requested_space, node)) {
-		if (is_splittable(node, requested_space)) {
-			split_space(node, requested_space);
-		}
+		// if (is_splittable(node, requested_space)) {
+			split_space(&node, requested_space);
+		// }
 		return node;
 	} else if (last_node(node)) {
 		return NULL;
@@ -108,7 +119,6 @@ void *myalloc(int requested_space) {
 	}
 
 	struct block *available_block = get_sufficient_block(requested_space, head);
-
 
 	if (available_block == NULL) { // if no available block
 		return NULL;
@@ -139,7 +149,7 @@ int main(void) {
 
     void *p;
 
-    p = myalloc(512);
+    p = myalloc(117);
     print_data();
 
     // myfree(p);
