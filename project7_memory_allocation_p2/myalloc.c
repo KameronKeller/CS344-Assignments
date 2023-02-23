@@ -16,35 +16,31 @@ Assignment: Project 7
 struct block *head = NULL;  // Head of the list, empty
 
 struct block {
-    struct block *next;
-    int size;     // Bytes
-    int in_use;   // Boolean
+	struct block *next;
+	int size;     // Bytes
+	int in_use;   // Boolean
 };
 
-void myfree(void *p) {
-
-}
-
 void print_data(void) {
-    struct block *b = head;
+	struct block *b = head;
 
-    if (b == NULL) {
-        printf("[empty]\n");
-        return;
-    }
+	if (b == NULL) {
+		printf("[empty]\n");
+		return;
+	}
 
-    while (b != NULL) {
-        // Uncomment the following line if you want to see the pointer values
-        //printf("[%p:%d,%s]", b, b->size, b->in_use? "used": "free");
-        printf("[%d,%s]", b->size, b->in_use? "used": "free");
-        if (b->next != NULL) {
-            printf(" -> ");
-        }
+	while (b != NULL) {
+		// Uncomment the following line if you want to see the pointer values
+		// printf("[%p:%d,%s]", b, b->size, b->in_use? "used": "free");
+		printf("[%d,%s]", b->size, b->in_use? "used": "free");
+		if (b->next != NULL) {
+			printf(" -> ");
+		}
 
-        b = b->next;
-    }
+		b = b->next;
+	}
 
-    printf("\n");
+	printf("\n");
 }
 
 int is_available(struct block *node) {
@@ -58,7 +54,9 @@ int is_large_enough(int padded_requested_space, struct block *node) {
 int is_splittable(struct block *node, int padded_requested_space) {
 	int available_space = node->size;
 	int padded_struct_block_size = PADDED_SIZE(sizeof(struct block));
-	int required_space = padded_requested_space + padded_struct_block_size + 16;
+
+	// required space = padded requested space + header of current node + header of future free node
+	int required_space = padded_requested_space + (padded_struct_block_size * 2);
 
 	return available_space >= required_space ? 1 : 0;
 }
@@ -71,6 +69,10 @@ void mark_in_use(struct block **node) {
 	(*node)->in_use = 1;
 }
 
+void mark_not_in_use(struct block **node) {
+	(*node)->in_use = 0;
+}
+
 void *pointer_offset(struct block *node) {
 	int padded_block_size = PADDED_SIZE(sizeof(struct block));
 	return PTR_OFFSET(node, padded_block_size);
@@ -78,11 +80,11 @@ void *pointer_offset(struct block *node) {
 
 
 void split_space(struct block **node, int padded_requested_space) {
-	int remaining_space = (*node)->size - padded_requested_space - sizeof(struct block);
+	int remaining_space = (*node)->size - padded_requested_space - PADDED_SIZE(sizeof(struct block));
 	struct block new_block = { .next=NULL, .size=remaining_space, .in_use=0 };
 	void *new_address = pointer_offset(*node) + padded_requested_space;
 
-	memcpy(new_address, &new_block, sizeof (struct block));
+	memcpy(new_address, &new_block, PADDED_SIZE(sizeof(struct block)));
 
 	(*node)->next = new_address;
 	(*node)->size = padded_requested_space;
@@ -103,11 +105,11 @@ struct block *get_sufficient_block(int padded_requested_space, struct block *nod
 }
 
 void setup_initial_memory(int num_bytes, struct block **head) {
-    *head = mmap(NULL, num_bytes, PROT_READ|PROT_WRITE,
-                MAP_ANON|MAP_PRIVATE, -1, 0);
-    (*head)->next = NULL;
-    (*head)->size = num_bytes - PADDED_SIZE(sizeof(struct block));
-    (*head)->in_use = 0;
+	*head = mmap(NULL, num_bytes, PROT_READ|PROT_WRITE,
+				MAP_ANON|MAP_PRIVATE, -1, 0);
+	(*head)->next = NULL;
+	(*head)->size = num_bytes - PADDED_SIZE(sizeof(struct block));
+	(*head)->in_use = 0;
 }
 
 void *myalloc(int requested_space) {
@@ -126,16 +128,42 @@ void *myalloc(int requested_space) {
 	}
 }
 
+void myfree(void *p) {
+	void *header_address = p - PADDED_SIZE(sizeof(struct block));
+	struct block *freed_block = (struct block *) header_address;
+	mark_not_in_use(&freed_block);
+}
+
 
 int main(void) {
 
-    void *p;
+	// ====== Example 1 ======
+	void *p;
 
-    p = myalloc(512);
-    print_data();
+	p = myalloc(512);
+	print_data();
 
-    myfree(p);
-    print_data();
+	myfree(p);
+	print_data();
+
+	// ====== Example 2 ======
+	head = NULL;
+
+	myalloc(10); print_data();
+	myalloc(20); print_data();
+	myalloc(30); print_data();
+	myalloc(40); print_data();
+	myalloc(50); print_data();
+
+	// ====== Example 3 ======
+	head = NULL;
+
+	myalloc(10);     print_data();
+	p = myalloc(20); print_data();
+	myalloc(30);     print_data();
+	myfree(p);       print_data();
+	myalloc(40);     print_data();
+	myalloc(10);     print_data();
 
 }
 
