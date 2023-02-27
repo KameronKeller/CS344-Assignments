@@ -88,7 +88,8 @@ void split_space(struct block **node, int padded_requested_space) {
 	// memcpy(new_address, &new_block, PADDED_SIZE(sizeof(struct block)));
 
 	// Method 2: no memcpy
-	struct block *new_block = pointer_offset(*node) + padded_requested_space + PADDED_SIZE(sizeof(struct block));
+	// struct block *new_block = pointer_offset(*node) + padded_requested_space + PADDED_SIZE(sizeof(struct block));
+	struct block *new_block = pointer_offset(*node) + padded_requested_space;
 	new_block->next = NULL;
 	new_block->size = remaining_space;
 	new_block->in_use = 0;
