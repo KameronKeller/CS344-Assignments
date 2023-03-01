@@ -83,18 +83,20 @@ void *pointer_offset(struct block *node) {
 void split_space(struct block **node, int padded_requested_space) {
 	int remaining_space = (*node)->size - padded_requested_space - PADDED_SIZE(sizeof(struct block));
 
-	// Method 1: using memcpy
-	// struct block new_block = { .next=NULL, .size=remaining_space, .in_use=0 };
-	// void *new_address = pointer_offset(*node) + padded_requested_space;
-	// memcpy(new_address, &new_block, PADDED_SIZE(sizeof(struct block)));
-
 	// Method 2: no memcpy
 	// struct block *new_block = pointer_offset(*node) + padded_requested_space + PADDED_SIZE(sizeof(struct block));
 	struct block *new_block = pointer_offset(*node) + padded_requested_space;
 	new_block->next = NULL;
+	new_block->prev = *node;
 	new_block->size = remaining_space;
 	new_block->in_use = 0;
 
+	// if (*node->next != NULL) {
+	// 	(*node)->prev
+	// }
+
+	// if the node is the head, then don't change prev
+	// if the node is not the head, update prev
 	(*node)->next = new_block;
 	(*node)->size = padded_requested_space;
 	(*node)->in_use = 1;
@@ -117,6 +119,7 @@ void setup_initial_memory(int num_bytes, struct block **head) {
 	*head = mmap(NULL, num_bytes, PROT_READ|PROT_WRITE,
 				MAP_ANON|MAP_PRIVATE, -1, 0);
 	(*head)->next = NULL;
+	(*head)->prev = NULL;
 	(*head)->size = num_bytes - PADDED_SIZE(sizeof(struct block));
 	(*head)->in_use = 0;
 }
@@ -132,16 +135,46 @@ void *myalloc(int requested_space) {
 	if (available_block == NULL) { // if no available block
 		return NULL;
 	} else {
+		// available_block->prev = 
 		mark_in_use(&available_block);
 		return pointer_offset(available_block);
 	}
 }
 
+void merge_blocks(struct block **current_block) {
+	// printf("merge_blocks [%p:%d,%s]\n", (*current_block), (*current_block)->size, (*current_block)->in_use? "used": "free");
+	if (*current_block != NULL & (*current_block)->in_use == 0){
+		struct block *next = (*current_block)->next;
+		if (next != NULL & next->in_use == 0) {
+			(*current_block)->size = (*current_block)->size + next->size + PADDED_SIZE(sizeof(struct block));
+			// printf("%d\n", (*current_block)->size);
+			// printf("[%p:%d,%s]\n", (*current_block), (*current_block)->size, (*current_block)->in_use? "used": "free");
+			if (next->next != NULL){
+				(*current_block)->next = next->next;
+				next->next->prev = (*current_block);
+			} else {
+				(*current_block)->next = NULL;
+			}
+		}
+
+	}
+}
+
 void myfree(void *p) {
+	// void *header_address = p - PADDED_SIZE(sizeof(struct block));
 	void *header_address = p - PADDED_SIZE(sizeof(struct block));
+
 	struct block *freed_block = (struct block *) header_address;
 	mark_not_in_use(&freed_block);
-	// mergeblocks(freed_block)
+	merge_blocks(&freed_block);
+	if (freed_block->prev != NULL) {
+		// printf("got here\n");
+		// printf("%p\n", (freed_block->prev);
+		struct block *previous = freed_block->prev;
+		// merge_blocks(&freed_block->prev);
+		// printf("merge_blocks [%p:%d,%s]\n", previous, previous->size, previous->in_use? "used": "free");
+		merge_blocks(&previous);
+	}
 }
 
 
@@ -154,47 +187,47 @@ int main(void) {
 
 	myfree(p); print_data();
 
-	// // ====== Example 2 ======
-	// head = NULL;
+	// ====== Example 2 ======
+	head = NULL;
 
-	// p = NULL;
-	// void *q;
+	p = NULL;
+	void *q;
 
-	// p = myalloc(10); print_data();
-	// q = myalloc(20); print_data();
+	p = myalloc(10); print_data();
+	q = myalloc(20); print_data();
 
-	// myfree(p); print_data();
-	// myfree(q); print_data();
+	myfree(p); print_data();
+	myfree(q); print_data();
 
-	// // ====== Example 3 ======
-	// head = NULL;
+	// ====== Example 3 ======
+	head = NULL;
 
-	// p = NULL; 
-	// q = NULL;
+	p = NULL; 
+	q = NULL;
 
-	// p = myalloc(10); print_data();
-	// q = myalloc(20); print_data();
+	p = myalloc(10); print_data();
+	q = myalloc(20); print_data();
 
-	// myfree(q); print_data();
-	// myfree(p); print_data();
+	myfree(q); print_data();
+	myfree(p); print_data();
 
+	// ====== Example 4 ======
+	head = NULL;
 
-	// // ====== Example 4 ======
-	// head = NULL;
+	void *r, *s;
+	p = NULL; 
+	q = NULL;
 
-	// void *r, *s;
-	// p = NULL; 
-	// q = NULL;
+	p = myalloc(10); print_data();
+	q = myalloc(20); print_data();
+	r = myalloc(30); print_data();
+	s = myalloc(40); print_data();
 
-	// p = myalloc(10); print_data();
-	// q = myalloc(20); print_data();
-	// r = myalloc(30); print_data();
-	// s = myalloc(40); print_data();
+	myfree(q); print_data();
+	myfree(p); print_data();
+	myfree(s); print_data();
+	myfree(r); print_data();
 
-	// myfree(q); print_data();
-	// myfree(p); print_data();
-	// myfree(s); print_data();
-	// myfree(r); print_data();
 
 }
 
