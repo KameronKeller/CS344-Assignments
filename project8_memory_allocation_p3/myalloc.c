@@ -62,6 +62,10 @@ int is_splittable(struct block *node, int padded_requested_space) {
 	return available_space >= required_space ? 1 : 0;
 }
 
+int is_mergeable(struct block *node) {
+	return node != NULL & node->in_use == 0;
+}
+
 int last_node(struct block *node) {
 	return node->next == NULL;
 }
@@ -132,9 +136,9 @@ void *myalloc(int requested_space) {
 }
 
 void merge_blocks(struct block **current_block) {
-	if (*current_block != NULL & (*current_block)->in_use == 0){
+	if (is_mergeable((*current_block))) {
 		struct block *next = (*current_block)->next;
-		if (next != NULL & next->in_use == 0) {
+		if (is_mergeable(next)) {
 			(*current_block)->size = (*current_block)->size + next->size + PADDED_SIZE(sizeof(struct block));
 			if (next->next != NULL){
 				(*current_block)->next = next->next;
@@ -149,8 +153,8 @@ void merge_blocks(struct block **current_block) {
 
 void myfree(void *p) {
 	void *header_address = p - PADDED_SIZE(sizeof(struct block));
-
 	struct block *freed_block = (struct block *) header_address;
+
 	mark_not_in_use(&freed_block);
 	merge_blocks(&freed_block);
 	if (freed_block->prev != NULL) {
