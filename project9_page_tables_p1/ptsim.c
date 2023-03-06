@@ -60,10 +60,32 @@ int allocate_page() {
 //
 void new_process(int proc_num, int page_count)
 {
-    (void)proc_num;   // remove after implementation
-    (void)page_count; // remove after implementation
+    // (void)proc_num;   // remove after implementation
+    // (void)page_count; // remove after implementation
 
     // TODO
+    int page_table = allocate_page();
+
+    if (page_table == 0xff) {
+        printf("OOM: proc %d: page table\n", proc_num);
+        exit(1);
+    }
+
+    // Set this process's page table pointer in zero page
+    mem[64 + proc_num] = page_table;
+
+    // Allocate data pages
+    for (int i = 0; i < page_count; i++) {
+        int new_page = allocate_page();
+
+        if (page_table == 0xff) {
+            printf("OOM: proc %d: data page\n", proc_num);
+            exit(1);
+        }
+
+        int pt_addr = get_address(page_table, i);
+        mem[pt_addr] = new_page;
+    }
 }
 
 //
