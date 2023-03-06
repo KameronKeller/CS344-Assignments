@@ -41,6 +41,18 @@ unsigned char get_page_table(int proc_num)
     return mem[ptp_addr];
 }
 
+int allocate_page() {
+    // 64 pages in the free page map
+    for (int page_num = 0; page_num < PAGE_COUNT; page_num++) {
+        if (mem[page_num] == 0) {
+            mem[page_num] = 1;
+            return page_num;
+        }
+    }
+
+    return 0xff;
+}
+
 //
 // Allocate pages for a new process
 //
@@ -120,7 +132,8 @@ int main(int argc, char *argv[])
             print_page_table(proc_num);
         } else if (strcmp(argv[i], "np")) {
             int proc_num = atoi(argv[i + 1]);
-            int num_pages = atoi(argv[i + 2]);
+            int page_count = atoi(argv[i + 2]);
+            new_process(proc_num, page_count);
         }
 
         // TODO: more command line arguments
