@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "usage: ptsim commands\n");
         return 1;
     }
-    
+
     initialize_mem();
 
     for (int i = 1; i < argc; i++) {
@@ -118,6 +118,9 @@ int main(int argc, char *argv[])
         else if (strcmp(argv[i], "ppt") == 0) {
             int proc_num = atoi(argv[++i]);
             print_page_table(proc_num);
+        } else if (strcmp(argv[i], "np")) {
+            int proc_num = atoi(argv[i + 1]);
+            int num_pages = atoi(argv[i + 2]);
         }
 
         // TODO: more command line arguments
