@@ -66,7 +66,7 @@ void new_process(int proc_num, int page_count)
     // TODO
     int page_table = allocate_page();
 
-    if (page_table == 0xff) {
+    if (page_table == 255) {
         printf("OOM: proc %d: page table\n", proc_num);
         exit(1);
     }
@@ -77,8 +77,7 @@ void new_process(int proc_num, int page_count)
     // Allocate data pages
     for (int i = 0; i < page_count; i++) {
         int new_page = allocate_page();
-
-        if (page_table == 0xff) {
+        if (new_page == 255) {
             printf("OOM: proc %d: data page\n", proc_num);
             exit(1);
         }
@@ -152,7 +151,7 @@ int main(int argc, char *argv[])
         else if (strcmp(argv[i], "ppt") == 0) {
             int proc_num = atoi(argv[++i]);
             print_page_table(proc_num);
-        } else if (strcmp(argv[i], "np")) {
+        } else if (strcmp(argv[i], "np") == 0) {
             int proc_num = atoi(argv[i + 1]);
             int page_count = atoi(argv[i + 2]);
             new_process(proc_num, page_count);
