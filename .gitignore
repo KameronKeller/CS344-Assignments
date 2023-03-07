@@ -1,3 +1,9 @@
+# Ignore text files
+*.txt
+
+# Ignore shell scripts used for testing
+*.sh
+
 # Ignore C executable files (extension-less); ignore all files except those with extensions and directorys
 *
 !*.*
