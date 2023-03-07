@@ -68,7 +68,7 @@ void new_process(int proc_num, int page_count)
 
     if (page_table == 255) {
         printf("OOM: proc %d: page table\n", proc_num);
-        exit(1);
+        return;
     }
 
     // Set this process's page table pointer in zero page
@@ -79,7 +79,7 @@ void new_process(int proc_num, int page_count)
         int new_page = allocate_page();
         if (new_page == 255) {
             printf("OOM: proc %d: data page\n", proc_num);
-            exit(1);
+            return;
         }
 
         int pt_addr = get_address(page_table, i);
