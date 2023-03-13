@@ -147,14 +147,25 @@ int main(int argc, char *argv[])
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "pfm") == 0) {
             print_page_free_map();
-        }
-        else if (strcmp(argv[i], "ppt") == 0) {
+        } else if (strcmp(argv[i], "ppt") == 0) {
             int proc_num = atoi(argv[++i]);
             print_page_table(proc_num);
         } else if (strcmp(argv[i], "np") == 0) {
             int proc_num = atoi(argv[i + 1]);
             int page_count = atoi(argv[i + 2]);
             new_process(proc_num, page_count);
+        } else if (strcmp(argv[i], "kp") == 0) {
+            int proc_num = atoi(argv[i + 1]);
+            kill_process(proc_num);
+        } else if (strcmp(argv[i], "sb") == 0) {
+            int proc_num = atoi(argv[i + 1]);
+            int virt_addr = atoi(argv[i + 2]);
+            int value = atoi(argv[i + 3]);
+            store_value(proc_num, virt_addr, value);
+        } else if (strcmp(argv[i], "lb") == 0) {
+            int proc_num = atoi(argv[i + 1]);
+            int virt_addr = atoi(argv[i + 2]);
+            load_value(proc_num, virt_addr);
         }
 
         // TODO: more command line arguments
