@@ -105,8 +105,9 @@ void store_value(int proc_num, int virt_addr, int value) {
 }
 
 void load_value(int proc_num, int virt_addr) {
-    (void)proc_num;
-    (void)virt_addr;
+    int phys_addr = get_physical_address(proc_num, virt_addr);
+    int value = mem[phys_addr];
+    printf("Load proc %d: %d => %d, value=%d\n", proc_num, virt_addr, phys_addr, value);
 }
 
 
