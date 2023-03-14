@@ -81,10 +81,27 @@ void kill_process(int proc_num) {
 
 }
 
+int get_physical_address(int proc_num, int virt_addr) {
+    int process_page_table = get_address(proc_num, 0);
+    // printf("process_page_table: %d\n", process_page_table);
+    int virtual_page = virt_addr >> 8;
+    // printf("virtual_page: %d\n", virtual_page);
+    int offset = virt_addr & 255;
+    int phys_page = mem[process_page_table + virtual_page];
+    // printf("phys_page: %d\n", phys_page);
+    int phys_addr = (phys_page << 8) | offset;
+    return phys_addr;
+}
+
 void store_value(int proc_num, int virt_addr, int value) {
-    (void)proc_num;
-    (void)virt_addr;
-    (void)value;
+    // (void)proc_num;
+    // (void)virt_addr;
+    // (void)value;
+    // int phys_addr = get_address(proc_num, virt_addr);
+    int phys_addr = get_physical_address(proc_num, virt_addr);
+    mem[phys_addr] = value;
+
+    printf("Store proc %d: %d => %d, value=%d\n", proc_num, virt_addr, phys_addr, value);
 }
 
 void load_value(int proc_num, int virt_addr) {
