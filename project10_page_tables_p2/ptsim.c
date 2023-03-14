@@ -7,7 +7,6 @@
 #define PAGE_SIZE 256  // MUST equal 2^PAGE_SHIFT
 #define PAGE_COUNT 64
 #define PAGE_SHIFT 8  // Shift page number this much
-
 #define PTP_OFFSET 64 // How far offset in page 0 is the page table pointer table
 
 // Simulated RAM
@@ -50,12 +49,20 @@ int allocate_page() {
     return 0xff;
 }
 
-void deallocate_page(int p) {
-    mem[p] = 0;
+
+
+//
+// Deallocate a specified page
+//
+void deallocate_page(int page) {
+    mem[page] = 0;
 }
 
+//
+// Kill the specified process
+//
 void kill_process(int proc_num) {
-    unsigned char page_table_page = get_page_table(proc_num); // get page table page
+    int page_table_page = get_page_table(proc_num); // get page table page
     // int page_table_page = mem[proc_num + PAGE_SIZE];
     // printf("ptp : %d\n", (int)page_table_page);
     // printf("mem at ptp: %d\n", mem[1 + 64]);
@@ -82,7 +89,7 @@ void kill_process(int proc_num) {
 }
 
 int get_physical_address(int proc_num, int virt_addr) {
-    int process_page_table = get_address(proc_num, 0);
+    int process_page_table = get_address(mem[PAGE_COUNT + proc_num], 0);
     // printf("process_page_table: %d\n", process_page_table);
     int virtual_page = virt_addr >> 8;
     // printf("virtual_page: %d\n", virtual_page);
