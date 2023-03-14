@@ -50,25 +50,35 @@ int allocate_page() {
     return 0xff;
 }
 
+void deallocate_page(int p) {
+    mem[p] = 0;
+}
+
 void kill_process(int proc_num) {
     unsigned char page_table_page = get_page_table(proc_num); // get page table page
     // int page_table_page = mem[proc_num + PAGE_SIZE];
     // printf("ptp : %d\n", (int)page_table_page);
+    // printf("mem at ptp: %d\n", mem[1 + 64]);
     int process_page_table = get_address(page_table_page, 0); // get address of processes page table
-    // printf("%d\n", process_page_table);
-    int freed_pages_count = 0;
-    for (int i = process_page_table; i < process_page_table + PAGE_COUNT; i++) {
-        if (mem[i] != 0) {
-            mem[i] = 0;
-            // printf("page table: %d\n", mem[i]);
-            freed_pages_count++;
+    // printf("process_page_table %d\n", process_page_table);
+    // int freed_pages_count = 0;
+    // printf("mem[256] %d\n", mem[256]);
+    // printf("mem[257] %d\n", mem[257]);
+
+    for (int entry = process_page_table; entry < process_page_table + PAGE_SIZE; entry++) { // dealocate pages associated with the process
+        if (mem[entry] != 0) {
+            // printf("mem[entry] %d\n", mem[entry]);
+            deallocate_page(mem[entry]);
+            // mem[entry] = 0;
+            // printf("page table: %d\n", mem[entry]);
+            // freed_pages_count++;
         }
     }
-    mem[page_table_page + PAGE_SIZE] = 0; // remove entry in physical memory's page table
+    deallocate_page(page_table_page); // remove entry in physical memory's page table
+    // mem[page_table_page + PAGE_SIZE] = 0; // remove entry in physical memory's page table
 
-    for (int i = proc_num; i <= proc_num + freed_pages_count; i++) { // remove entry in free page map
-        mem[i] = 0;
-    }
+
+
 }
 
 void store_value(int proc_num, int virt_addr, int value) {
