@@ -20,7 +20,6 @@ struct block {
     int in_use;   // Boolean
 };
 
-// void myfree(void *p); // To be implemented
 
 void print_data(void) {
     struct block *b = head;
