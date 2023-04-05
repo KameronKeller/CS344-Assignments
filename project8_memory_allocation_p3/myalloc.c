@@ -173,6 +173,14 @@ int main(void) {
 	myfree(p); print_data();
 
 	// ====== Example 2 ======
+	/*
+	Example output:
+		[16,used] -> [976,free]
+		[16,used] -> [32,used] -> [928,free]
+		[16,free] -> [32,used] -> [928,free]
+		[1008,free] 
+	*/
+
 	head = NULL;
 
 	p = NULL;
